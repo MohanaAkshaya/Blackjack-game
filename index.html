@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home — Play Blackjack</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#16a34a; --muted:#94a3b8; --glass: rgba(255,255,255,0.04);
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,'Helvetica Neue',Arial;background:linear-gradient(180deg,#061021 0%, #081825 60%);color:#e6eef8;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px}
+    .app{width:100%;max-width:980px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:20px;box-shadow:0 10px 30px rgba(2,6,23,0.6);}
+
+    /* Header */
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    header h1{font-size:20px;margin:0}
+    .tabs{display:flex;gap:8px}
+    .tab{background:var(--glass);border-radius:10px;padding:8px 12px;cursor:pointer;color:var(--muted);font-weight:600}
+    .tab.active{color:var(--accent);background:linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:inset 0 -2px 0 rgba(255,255,255,0.02)}
+
+    /* Main area */
+    .content{display:grid;grid-template-columns:1fr 420px;gap:18px}
+    @media (max-width:880px){.content{grid-template-columns:1fr;}}
+
+    /* Home panel */
+    .home{background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);padding:28px;border-radius:12px;}
+    .hero{display:flex;gap:18px;align-items:center}
+    .hero .left{flex:1}
+    .hero h2{margin:0 0 8px 0;font-size:28px}
+    .hero p{margin:0;color:var(--muted)}
+    .play-btn{margin-top:18px;padding:12px 18px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#10b981);border:none;color:#032018;font-weight:700;font-size:15px;cursor:pointer}
+
+    /* Right sidebar (instructions / stats) */
+    .card{background:var(--card);padding:16px;border-radius:12px}
+    .muted{color:var(--muted);font-size:14px}
+
+    /* Game panel */
+    .game{display:none;gap:14px}
+    .game.active{display:block}
+    .table{background:linear-gradient(180deg,#05202b,#042028);padding:16px;border-radius:12px;margin-bottom:12px}
+    .area{display:flex;gap:12px;align-items:flex-end;justify-content:space-between}
+    .hand{min-height:120px;padding:10px;border-radius:10px;display:flex;gap:8px;align-items:center}
+    .hand .label{font-size:13px;color:var(--muted);}
+
+    .card-face{width:72px;height:96px;border-radius:8px;background:linear-gradient(180deg,#fff,#ddd);color:#111;display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-weight:700;box-shadow:0 6px 18px rgba(2,6,23,0.5)}
+    .card-face.small{width:58px;height:76px;font-size:13px}
+    .card-back{width:72px;height:96px;border-radius:8px;background:repeating-linear-gradient(45deg,#0b1220 0 4px,#09202a 4px 8px);}
+
+    .controls{display:flex;gap:10px;margin-top:12px}
+    .btn{padding:10px 14px;border-radius:10px;border:none;background:#111827;color:#fff;cursor:pointer;font-weight:700}
+    .btn.primary{background:var(--accent);color:#021a0f}
+    .status{margin-top:10px;color:var(--muted)}
+
+    footer{margin-top:12px;text-align:center;color:var(--muted);font-size:13px}
+
+    /* subtle animations */
+    .card-face,.card-back{transform-origin:center;transition:transform .25s ease, box-shadow .25s ease}
+    .card-face:hover{transform:translateY(-6px)}
+
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>BLACKJACK</h1>
+      <div class="tabs">
+        <div class="tab active" data-tab="home">Home</div>
+        <div class="tab" data-tab="game">Play</div>
+      </div>
+    </header>
+
+    <main class="content">
+      <section class="home-panel">
+        <div class="home">
+          <div class="hero">
+            <div class="left">
+              <h2>Welcome to Quick Blackjack</h2>
+              <p>Click Play to start a single-player blackjack round against the dealer. Uses standard rules: try to get as close to 21 without going over. Aces count as 1 or 11.</p>
+              <button class="play-btn" id="playNow">Play Blackjack</button>
+            </div>
+            <div class="right" style="min-width:200px;">
+              <div class="card">
+                <div style="font-weight:700">How to play</div>
+                <p class="muted" style="margin-top:8px">Deal, then choose Hit to take a card or Stand to hold. Dealer draws until 17. Best of luck!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:12px;flex-wrap:wrap">
+          <div class="card" style="flex:1;min-width:220px">
+            <div style="font-weight:700">Quick Tips</div>
+            <ul class="muted" style="margin:8px 0 0 18px">
+              <li>Stand on a strong total (17+)</li>
+              <li>Hit on low totals (11 or less always hit)</li>
+              <li>Soft totals (ace+something) are flexible</li>
+            </ul>
+          </div>
+
+          <div class="card" style="width:260px">
+            <div style="font-weight:700">Controls</div>
+            <div class="muted" style="margin-top:8px">Use the buttons in the Play tab to Hit, Stand, or Deal a new round.</div>
+          </div>
+        </div>
+      </section>
+
+      <aside style="display:flex;flex-direction:column;gap:12px">
+        <div class="card">
+          <div style="font-weight:700">Session</div>
+          <div class="muted" id="bankroll">Money: 1000 chips</div>
+        </div>
+
+        <div class="card">
+          <div style="font-weight:700">Round Info</div>
+          <div class="muted" id="roundInfo">No game played yet</div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Game area (hidden until Play tab selected) -->
+    <section id="gamePanel" class="game" style="margin-top:18px">
+      <div class="table">
+        <div class="area">
+          <div>
+            <div class="label">Dealer</div>
+            <div id="dealerHand" class="hand"></div>
+            <div class="muted" id="dealerScore">Score: -</div>
+          </div>
+          <div style="text-align:center">
+            <div class="label">Table</div>
+            <div class="muted" id="message">Deal to begin</div>
+          </div>
+          <div>
+            <div class="label">You</div>
+            <div id="playerHand" class="hand"></div>
+            <div class="muted" id="playerScore">Score: -</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="btn" id="dealBtn">Deal</button>
+          <button class="btn" id="hitBtn" disabled>Hit</button>
+          <button class="btn" id="standBtn" disabled>Stand</button>
+          <button class="btn" id="newRoundBtn">New Round</button>
+        </div>
+        <div class="status" id="status">Status: waiting</div>
+      </div>
+
+      <footer>Created for Entertainment</footer>
+    </section>
+  </div>
+
+  <script>
+    // --- UI Tab logic ---
+    const tabs = document.querySelectorAll('.tab');
+    const homeTab = document.querySelector('[data-tab="home"]');
+    const gameTab = document.querySelector('[data-tab="game"]');
+    const gamePanel = document.getElementById('gamePanel');
+
+    function switchTo(tabName){
+      tabs.forEach(t=>t.classList.toggle('active', t.dataset.tab===tabName));
+      if(tabName==='home'){
+        gamePanel.classList.remove('active');
+      } else {
+        gamePanel.classList.add('active');
+      }
+    }
+
+    tabs.forEach(t=>t.addEventListener('click', ()=>switchTo(t.dataset.tab)));
+    document.getElementById('playNow').addEventListener('click', ()=>{
+      switchTo('game');
+      // focus deal button for quick start
+      setTimeout(()=>document.getElementById('dealBtn').focus(),80);
+    });
+
+    // --- Blackjack logic ---
+    const ranks = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
+    const suits = ["♠","♥","♦","♣"];
+    let deck = [];
+    let player = [];
+    let dealer = [];
+    let inRound = false;
+
+    const dealerHandEl = document.getElementById('dealerHand');
+    const playerHandEl = document.getElementById('playerHand');
+    const playerScoreEl = document.getElementById('playerScore');
+    const dealerScoreEl = document.getElementById('dealerScore');
+    const messageEl = document.getElementById('message');
+    const statusEl = document.getElementById('status');
+    const roundInfoEl = document.getElementById('roundInfo');
+
+    function buildDeck(){
+      deck = [];
+      for(const s of suits){
+        for(const r of ranks){
+          let v = 0;
+          if(r==='A') v = 11;
+          else if(['J','Q','K'].includes(r)) v = 10;
+          else v = parseInt(r,10);
+          deck.push({rank:r,suit:s,value:v});
+        }
+      }
+    }
+
+    function shuffle(){
+      for(let i=deck.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [deck[i],deck[j]]=[deck[j],deck[i]];
+      }
+    }
+
+    function draw(){
+      if(deck.length===0){buildDeck();shuffle();}
+      return deck.pop();
+    }
+
+    function calcScore(hand){
+      let total=0;let aces=0;
+      for(const c of hand){ total+=c.value; if(c.rank==='A') aces++; }
+      while(total>21 && aces>0){ total-=10; aces--; }
+      return total;
+    }
+
+    function renderCard(card){
+      const el = document.createElement('div');
+      el.className = 'card-face';
+      el.innerHTML = `<div>${card.rank}</div><div style="text-align:right">${card.suit}</div>`;
+      return el;
+    }
+
+    function renderBack(){
+      const el = document.createElement('div');
+      el.className='card-back';
+      return el;
+    }
+
+    function renderHands(hideDealerFirst=true){
+      dealerHandEl.innerHTML='';playerHandEl.innerHTML='';
+      dealer.forEach((c,i)=>{
+        if(i===0 && hideDealerFirst && inRound) dealerHandEl.appendChild(renderBack());
+        else dealerHandEl.appendChild(renderCard(c));
+      });
+      player.forEach(c=>playerHandEl.appendChild(renderCard(c)));
+
+      playerScoreEl.textContent = 'Score: ' + calcScore(player);
+      if(!inRound) dealerScoreEl.textContent = 'Score: -';
+      else if(inRound) dealerScoreEl.textContent = 'Score: ' + (dealer.length>1 ? calcScore(dealer) : '?');
+    }
+
+    function setStatus(text){ statusEl.textContent = 'Status: ' + text; }
+
+    function startRound(){
+      if(inRound) return;
+      inRound = true; player=[]; dealer=[];
+      if(deck.length<15){ buildDeck(); shuffle(); }
+      // initial deal
+      player.push(draw()); dealer.push(draw()); player.push(draw()); dealer.push(draw());
+      renderHands(true);
+      document.getElementById('hitBtn').disabled=false;
+      document.getElementById('standBtn').disabled=false;
+      setStatus('Round in progress');
+      messageEl.textContent = 'Your move';
+      roundInfoEl.textContent = 'Round started';
+
+      // check immediate blackjack
+      const pScore = calcScore(player); const dScore = calcScore(dealer);
+      if(pScore===21 || dScore===21){
+        // reveal and decide
+        revealAndDecide();
+      }
+    }
+
+    function hit(){
+      if(!inRound) return;
+      player.push(draw());
+      renderHands(true);
+      const s = calcScore(player);
+      if(s>21){
+        revealAndDecide();
+      }
+    }
+
+    function stand(){
+      if(!inRound) return;
+      // dealer plays
+      while(calcScore(dealer)<17){ dealer.push(draw()); }
+      revealAndDecide();
+    }
+
+    function revealAndDecide(){
+      inRound=false;
+      document.getElementById('hitBtn').disabled=true;
+      document.getElementById('standBtn').disabled=true;
+      renderHands(false);
+
+      const p = calcScore(player); const d = calcScore(dealer);
+      let result='';
+      if(p>21) result='Bust — you lose';
+      else if(d>21) result='Dealer busts — you win!';
+      else if(p===d) result='Push — tie';
+      else if(p> d) result='You win!';
+      else result='You lose';
+
+      messageEl.textContent = result;
+      setStatus('Round finished');
+      roundInfoEl.textContent = `You: ${p} — Dealer: ${d}`;
+    }
+
+    function newRound(){
+      inRound=false; player=[]; dealer=[]; renderHands(false);
+      messageEl.textContent = 'Deal to begin';
+      setStatus('waiting');
+      document.getElementById('hitBtn').disabled=true;
+      document.getElementById('standBtn').disabled=true;
+      roundInfoEl.textContent = 'Ready for new round';
+    }
+
+    // wire buttons
+    document.getElementById('dealBtn').addEventListener('click', startRound);
+    document.getElementById('hitBtn').addEventListener('click', hit);
+    document.getElementById('standBtn').addEventListener('click', stand);
+    document.getElementById('newRoundBtn').addEventListener('click', newRound);
+
+    // init
+    buildDeck();shuffle();newRound();
+  </script>
+</body>
+</html>
